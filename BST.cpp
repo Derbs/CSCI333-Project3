@@ -23,7 +23,7 @@ void BST<T>::destructorHelper(Node<T>* curr) {
 
 template <typename T>
 void BST<T>::leftRotation(Node<T>** crit) {
-  if(crit == 0) crit = &root;
+  if(crit == 0) crit = &root;  //to test the rotate function.
   Node<T>* temp = *crit;  
   Node<T>* holder = (temp->getRightChild())->getLeftChild();
   *crit = temp->getRightChild();
@@ -33,7 +33,7 @@ void BST<T>::leftRotation(Node<T>** crit) {
 
 template <typename T>
 void BST<T>::rightRotation(Node<T>** crit) {
-  if(crit == 0) crit = &root;
+  if(crit == 0) crit = &root;  //to test the rotate function.
   Node<T>* temp = *crit;  
   Node<T>* holder = (temp->getLeftChild())->getRightChild();
   *crit = temp->getLeftChild();
@@ -58,7 +58,6 @@ bool BST<T>::find(T v) {
   else {
     return true;
   }
-  return true;
 }
 
 template <typename T>
@@ -122,7 +121,7 @@ void BST<T>::insert(T v) {
         if(d1 == 1) leftRotation(critNode);
         else if(d1 == -1) rightRotation(critNode);
       }
-      else {
+      else {  //time to do a double rotation.
         if(v>(*grandChild)->getValue()) {
           d3 = 1;
           R = (*grandChild)->getRightChild();
@@ -131,7 +130,7 @@ void BST<T>::insert(T v) {
           d3 = -1;
           R = (*grandChild)->getLeftChild();
         }
-
+       
         if(d3==d2) {
           (*critNode)->setBal(0);
           (*child)->setBal(d1);
@@ -157,10 +156,8 @@ void BST<T>::insert(T v) {
         }
       }
     }
-    
   }
-
-  while(R->getValue() != v) {
+  while(R!=0 && R->getValue() != v) {
     if(R->getValue()<v) {
       R->setBal(1);
       R = R->getRightChild();
@@ -174,18 +171,25 @@ void BST<T>::insert(T v) {
 
 template <typename T>
 void BST<T>::remove(T v) {
-  Node<T>** curr = &root; 
-  while(*curr!=0 && (*curr)->getValue()!=v) {
+  Node<T>** curr = &root;  //start at root, of course.
+  std::list< Node<T>** > path = std::list< Node<T>** >();  //save the path to the node as a stack-list
+  std::list<int> directions = std::list<int>(); //this is a stack of directions, where the number is the direction (left is -1 and right is +1) traveled to reach the node to delete.
+  while(*curr!=0 && (*curr)->getValue()!=v) {  //find the Node to remove, if it exists.
+    path.push_front(curr);
     if(v<(*curr)->getValue()) {
       curr = &(*curr)->getLeftChild();
+      directions.push_front(-1);
     }
     else if (v>(*curr)->getValue()) {
       curr = &(*curr)->getRightChild();
+      directions.push_front(1);
     }
+    std::cout<<(*curr)<<"::"<<(*curr)->getValue()<<"&"<<directions.front()<<"   ";
   }
-  if(*curr!=0) {
+  std::cout<<std::endl;
+  if(*curr!=0) {  //if the Node to remove exists.  
     Node<T>* nodeToRemove = *curr;
-    if(nodeToRemove->getRightChild() == 0 && nodeToRemove->getLeftChild() == 0) {
+    if(nodeToRemove->getRightChild() == 0 && nodeToRemove->getLeftChild() == 0) {  //No children.
       *curr = 0;
     }
     else if(nodeToRemove->getRightChild() == 0) {
@@ -194,13 +198,20 @@ void BST<T>::remove(T v) {
     else if(nodeToRemove->getLeftChild() == 0) {
       *curr = (*curr)->getRightChild(); //and we're done (we don't need the ios)
     }
-    else {
-      Node<T>* ios = nodeToRemove->getRightChild();
-      while(ios->getLeftChild()!=0) {
-        ios = ios->getLeftChild();
+    else {  //two children, need the ios.
+      Node<T>** ios = &(nodeToRemove->getRightChild());
+      while((*ios)->getLeftChild()!=0) {
+        ios = &(*ios)->getLeftChild();
       }
-      ios->setLeftChild(*(nodeToRemove->getLeftChild()));
-      *curr = (*curr)->getRightChild();
+      std::cout<<(*ios)<<std::endl;
+      Node<T>* temp = (*ios)->getRightChild();
+      (*ios)->setLeftChild(*((*curr)->getLeftChild()));
+      if((*ios)!=((*curr)->getRightChild())) {
+        (*ios)->setRightChild(*((*curr)->getRightChild()));   
+      }
+      *curr = *ios;
+      *ios = temp;
+      //(*ios)->setLeftChild(*(nodeToRemove->getLeftChild()));
     }
     delete nodeToRemove;
   }

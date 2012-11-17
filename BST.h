@@ -12,14 +12,14 @@ class BST {
   void traversalPrint(Node<T>* curr);
   void levelTraversal(std::list< Node<T>* >* parents, int level);
   void postPrint(Node<T>* curr);
+  void leftRotation(Node<T>** crit);
+  void rightRotation(Node<T>** crit);
   int pow(int a, int p);
   int depth(Node<T>* curr, int dpth, int maxDepth);
   void destructorHelper(Node<T>* curr);  
  public:
   BST<T>();
   ~BST<T>();
-  void leftRotation(Node<T>** crit);
-  void rightRotation(Node<T>** crit);
   bool find(T v);
   void remove(T v);
   void insert(T v);
