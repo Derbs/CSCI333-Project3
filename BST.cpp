@@ -184,9 +184,7 @@ void BST<T>::remove(T v) {
       curr = &(*curr)->getRightChild();
       directions.push_front(1);
     }
-    std::cout<<(*curr)<<"::"<<(*curr)->getValue()<<"&"<<directions.front()<<"   ";
   }
-  std::cout<<std::endl;
   if(*curr!=0) {  //if the Node to remove exists.  
     Node<T>* nodeToRemove = *curr;
     if(nodeToRemove->getRightChild() == 0 && nodeToRemove->getLeftChild() == 0) {  //No children.
@@ -200,20 +198,52 @@ void BST<T>::remove(T v) {
     }
     else {  //two children, need the ios.
       Node<T>** ios = &(nodeToRemove->getRightChild());
+      path.push_front(ios);
+      directions.push_front(1);
       while((*ios)->getLeftChild()!=0) {
+        directions.push_front(-1);
         ios = &(*ios)->getLeftChild();
+        path.push_front(ios);
       }
-      std::cout<<(*ios)<<std::endl;
       Node<T>* temp = (*ios)->getRightChild();
       (*ios)->setLeftChild(*((*curr)->getLeftChild()));
+      (*ios)->setBal((nodeToRemove->getBalance()));
       if((*ios)!=((*curr)->getRightChild())) {
-        (*ios)->setRightChild(*((*curr)->getRightChild()));   
+        (*ios)->setRightChild(*((*curr)->getRightChild()));
       }
       *curr = *ios;
       *ios = temp;
-      //(*ios)->setLeftChild(*(nodeToRemove->getLeftChild()));
     }
     delete nodeToRemove;
+    //update balances, do rotations as necessary.  
+    Node<T>** R;
+    int d,bal;
+    while(*(path.front())!=0) {
+      R = path.front();
+      path.pop_front();
+      d = directions.front();
+      directions.pop_front();
+
+      bal = (*R)->getBalance();
+
+
+      if(bal == 0) {
+        (*R)->setBal(-d);
+        return;
+      }
+      else if(bal==d) {
+        (*R)->setBal(0);
+      }
+      else if(bal == -d) {
+        if(bal == 1) {
+	  leftRotation(R); 
+	}
+        else if(bal == -1) {
+	  rightRotation(R);
+        }
+        (*R)->setBal(0);
+      }
+    }
   }
 }
 
@@ -226,7 +256,7 @@ template <typename T>
 void BST<T>::traversalPrint(Node<T>* curr) { //inOrderTraversalPrinting.  recursive.
   if(curr != 0) {
     traversalPrint(curr->getLeftChild());
-    std::cout << curr->getValue() << std::endl;
+    std::cout << curr->getValue() << "::"<<curr->getBalance()<< std::endl;
     traversalPrint(curr->getRightChild());
   }
 }
